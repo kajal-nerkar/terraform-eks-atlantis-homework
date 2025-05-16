@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlantis
+  namespace: atlantis
+  labels:
+    app: atlantis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atlantis
+  template:
+    metadata:
+      labels:
+        app: atlantis
+    spec:
+      containers:
+      - name: atlantis
+        image: runatlantis/atlantis:v${ATLANTIS_CHART_VERSION}
+        args:
+          - server
+          - --repo-whitelist=.*kajal-nerkar\/terraform-eks-atlantis-homework.*
+          - --gh-user=$(GITHUB_USER)
+          - --gh-token=$(GITHUB_TOKEN)
+          - --gh-webhook-secret=$(WEBHOOK_SECRET)
+          - --config=/etc/atlantis/repos.yaml
+        env:
+          - name: GITHUB_USER
+            valueFrom:
+              secretKeyRef:
+                name: atlantis-github
+                key: github-user
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: atlantis-github
+                key: github-token
+          - name: WEBHOOK_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: atlantis-github
+                key: webhook-secret
+        volumeMounts:
+          - name: config
+            mountPath: /etc/atlantis
+        resources:
+          requests:
+            cpu:    100m
+            memory: 256Mi
+          limits:
+            cpu:    500m
+            memory: 512Mi
+      volumes:
+        - name: config
+          configMap:
+            name: atlantis-config
