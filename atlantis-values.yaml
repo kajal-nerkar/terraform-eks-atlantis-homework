@@ -1,0 +1,25 @@
+# atlantis-values.yaml
+# ─────────────────────
+# Atlantis CLI args:
+server:
+  extraArgs:
+    - --gh-user=kajal-nerkar
+    - --gh-webhook-secret=$(WEBHOOK_SECRET)
+
+# GitHub credentials (these get filled via Helm set_sensitive)
+github:
+  user:      kajal-nerkar
+  webhookSecret: placeholder # (overwritten by set_sensitive)
+  token:         placeholder # (overwritten by set_sensitive)
+
+# (rest of your configmap data, workflows, etc.)
+repos:
+  - id: /.*/
+    workflow: default
+
+workflows:
+  default:
+    plan:
+      steps: ["init", "plan"]
+    apply:
+      steps: ["apply"]
