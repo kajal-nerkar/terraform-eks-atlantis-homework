@@ -17,14 +17,14 @@ spec:
     spec:
       containers:
       - name: atlantis
-        image: runatlantis/atlantis:v${ATLANTIS_CHART_VERSION}
+        image: runatlantis/atlantis:v0.27.0  # Explicit version recommended
         args:
           - server
-          - --repo-whitelist=.*kajal-nerkar\/terraform-eks-atlantis-homework.*
+          - --repo-allowlist=github.com/kajal-nerkar/terraform-eks-atlantis-homework
           - --gh-user=$(GITHUB_USER)
           - --gh-token=$(GITHUB_TOKEN)
           - --gh-webhook-secret=$(WEBHOOK_SECRET)
-          - --config=/etc/atlantis/repos.yaml
+          - --allow-commands
         env:
           - name: GITHUB_USER
             valueFrom:
@@ -41,15 +41,22 @@ spec:
               secretKeyRef:
                 name: atlantis-github
                 key: webhook-secret
+          - name: ATLANTIS_REPO_ALLOWLIST
+            value: "github.com/kajal-nerkar/terraform-eks-atlantis-homework"
+          - name: ATLANTIS_LOG_LEVEL
+            value: debug
+        ports:
+          - containerPort: 4141
+            name: atlantis
         volumeMounts:
           - name: config
             mountPath: /etc/atlantis
         resources:
           requests:
-            cpu:    100m
+            cpu: 100m
             memory: 256Mi
           limits:
-            cpu:    500m
+            cpu: 500m
             memory: 512Mi
       volumes:
         - name: config
